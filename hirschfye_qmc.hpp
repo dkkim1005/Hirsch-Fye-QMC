@@ -19,8 +19,6 @@ typedef std::vector<double> ImTimeGreen;
 
 class HirschFyeQMC
 {
-  enum SPIN_STATE {UP = 1, DOWN = -1};
-
 public:
   HirschFyeQMC(const ImTimeGreen & gtau0, const double beta, const double U, const unsigned long seed);
   // return acceptance rate
@@ -28,6 +26,7 @@ public:
   void accumulate(ImTimeGreen & G_up, ImTimeGreen & G_dw, ImTimeGreen & G2_up, ImTimeGreen & G2_dw);
 
 private:
+  enum SPIN_STATE {UP = 1, DOWN = -1};
   double e1lamb_(const int & s) const { return exp1lamb_[s+1]; }
   double e2lamb_(const int & s) const { return exp2lamb_[s+1]; }
   void clean_update_(std::vector<double> & gtaumat, SPIN_STATE SPIN);

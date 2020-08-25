@@ -28,6 +28,64 @@ void GreenInverseFourier(const ImFreqGreen & giwn, const double beta,
   gtau[gtau.size()-1] = gedge.real() - 0.5*M[0] + (beta/4.0)*M[1];
 }
 
+void GreenFourier(const ImTimeGreen & gtau, const double beta, ImFreqGreen & giwn, const bool useSpline)
+{
+  ImTimeGreen gtautmp = gtau;
+  // check whether mesh size satisfies the Nyquist theorem.
+  if ((gtau.size()/2 < giwn.size()) or useSpline)
+  {
+    std::vector<double> tau(gtau.size());
+    for (int i=0; i<tau.size(); ++i)
+      tau[i] = i*beta/(tau.size()-1.0);
+    etc::MonotoneCubicInterpolation interp(tau.data(), gtau.data(), tau.size());
+    const int size = 10*giwn.size()+1;
+    gtautmp.resize(size);
+    for (int i=0; i<gtautmp.size(); ++i)
+      gtautmp[i] = interp(i*beta/(gtautmp.size()-1.0));
+  }
+
+  const double dtau = beta/(gtautmp.size()-1.0);
+  std::vector<std::complex<double> > gmod(gtautmp.size(), 0.0);
+
+  for(int i=0; i<gtautmp.size(); ++i)
+  {
+    const double tau = i*dtau;
+    gmod[i] = gtautmp[i]*std::exp(std::complex<double>(0, M_PI/beta*tau))*dtau;
+  }
+
+  // composite Simpson's rule
+  for (int i=1; i<gmod.size()-1; i+=2)
+    gmod[i] *= 4;
+  for (int i=2; i<gmod.size()-2; i+=2)
+    gmod[i] *= 2;
+  for (int i=0; i<gmod.size(); i++)
+    gmod[i] *= 1.0/3.0;
+
+  if (gmod.size()%2 == 0)
+  {
+    for (int i=gmod.size()-4; i<gmod.size(); ++i)
+    {
+      const double tau = i*dtau;
+      gmod[i] = gtautmp[i]*std::exp(std::complex<double>(0, M_PI/beta*tau))*dtau;
+    }
+    // Simpson's 3/8 rule
+    gmod[gmod.size()-4] *= (1.0/3.0+3.0/8.0);
+    gmod[gmod.size()-3] *= (9.0/8.0);
+    gmod[gmod.size()-2] *= (9.0/8.0);
+    gmod[gmod.size()-1] *= (3.0/8.0);
+  }
+
+  std::vector<std::complex<double> > giwn_temp(gtautmp.size(), std::complex<double>(0,0));
+
+  etc::fft_1d_complex(gmod.data(), giwn_temp.data(), gtautmp.size()-1, etc::BACKWARD);
+	
+  for(int i=0;i<giwn_temp.size()-1;++i)
+    giwn_temp[i] += gmod[gmod.size()-1];
+
+  for (int n=0; n<giwn.size(); ++n)
+    giwn[n] = giwn_temp[n];
+}
+
 ImFreqGreen SemiCircularGreen(const int niwn, const double beta,
   const double mu, const double V, const double D, const int ne)
 {

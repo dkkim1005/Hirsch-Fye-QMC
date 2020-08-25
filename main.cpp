@@ -56,8 +56,9 @@ int main(int argc, char * argv[])
   ImFreqGreen giwn = SemiCircularGreen(niwn, beta, mu, V, D);
   GreenInverseFourier(giwn, beta, {1.0, 0.0, 0.0}, gtau);
 
-  ImTimeGreen gtau0(ntau-1), G_up(ntau-1, 0.0), G_dw(ntau-1, 0.0),
-    G2_up(ntau-1, 0.0), G2_dw(ntau-1, 0.0);
+  // # of mesh (time): ntau -> ntau-1
+  ImTimeGreen gtau0(ntau-1), gtau0_up(ntau-1, 0.0), gtau0_dw(ntau-1, 0.0),
+    gtau2_up(ntau-1, 0.0), gtau2_dw(ntau-1, 0.0);
   for (int i=0; i<gtau0.size(); ++i)
     gtau0[i] = gtau[i];
 
@@ -70,43 +71,50 @@ int main(int argc, char * argv[])
     std::cout << "\r# loop : " << std::setw(4) << (n+1) << " ";
     const double acceptanceRate = qmc.do_montecarlo_step(nms, nperiodSweeps);
     std::cout << " --- acceptance rate : " << acceptanceRate << std::flush;
-    qmc.accumulate(G_up, G_dw, G2_up, G2_dw);
+    qmc.accumulate(gtau0_up, gtau0_dw, gtau2_up, gtau2_dw);
   }
   std::cout << std::endl;
 
   for (int i=0; i<gtau0.size(); ++i)
   {
-    G_up[i] /= nmeas;
-    G_dw[i] /= nmeas;
-    G2_up[i] /= nmeas;
-    G2_dw[i] /= nmeas;
+    gtau0_up[i] /= nmeas;
+    gtau0_dw[i] /= nmeas;
+    gtau2_up[i] /= nmeas;
+    gtau2_dw[i] /= nmeas;
   }
+
+  // # of mesh (time): ntau-1 -> ntau
+  ImTimeGreen gtau_up(ntau), gtau_dw(ntau), chi_up(ntau), chi_dw(ntau);
+  for (int i=0; i<ntau-1; ++i)
+  {
+    gtau_up[i] = -gtau0_up[i];
+    gtau_dw[i] = -gtau0_dw[i];
+    const double chi1 = std::sqrt((gtau2_up[i]-gtau0_up[i]*gtau0_up[i])/((nmeas-1)));
+    const double chi2 = std::sqrt((gtau2_dw[i]-gtau0_dw[i]*gtau0_dw[i])/((nmeas-1)));
+    chi_up[i] = chi1;
+    chi_dw[i] = chi2;
+  }
+  gtau_up[ntau-1] = -1.0-gtau_up[0];
+  gtau_dw[ntau-1] = -1.0-gtau_dw[0];
+  chi_up[ntau-1] = chi_up[0];
+  chi_dw[ntau-1] = chi_dw[0];
 
   std::string Ustr = etc::to_string(U),
     betastr = etc::to_string(beta),
     mustr = etc::to_string(mu);
-  const std::string filename = parser.find<>("path") + "/Gtau-U" + Ustr + "B" + betastr + "M" + mustr + ".dat";
+  const std::string filename1 = parser.find<>("path") + "/Gtau-U" + Ustr + "B" + betastr + "M" + mustr + ".dat";
 
-  std::ofstream file(filename);
+  std::ofstream file(filename1);
   file << "#       tau        Gtau sigma(Gtau)" << std::endl;
-  for (int i=0; i<gtau0.size(); ++i)
+  for (int i=0; i<ntau; ++i)
   {
     const double tau = beta/(ntau-1)*i;
-    const double chi1 = std::sqrt((G2_up[i]-G_up[i]*G_up[i])/((nmeas-1)));
-    const double chi2 = std::sqrt((G2_dw[i]-G_dw[i]*G_dw[i])/((nmeas-1)));
     file << std::setw(11) << tau << " "
-	 << std::setw(11) << G_up[i] << " "
-	 << std::setw(11) << chi1 << " "
-	 << std::setw(11) << G_dw[i] << " "
-	 << std::setw(11) << chi2 << std::endl;
+	 << std::setw(11) << gtau_up[i] << " "
+	 << std::setw(11) << chi_up[i] << " "
+	 << std::setw(11) << gtau_dw[i] << " "
+	 << std::setw(11) << chi_dw[i] << std::endl;
   }
-  const double chi1 = std::sqrt((G2_up[0]-G_up[0]*G_up[0])/((nmeas-1)));
-  const double chi2 = std::sqrt((G2_dw[0]-G_dw[0]*G_dw[0])/((nmeas-1)));
-  file << std::setw(11) << beta << " "
-       << std::setw(11) << (1-G_up[0]) << " "
-       << std::setw(11) << chi1 << " "
-       << std::setw(11) << (1-G_dw[0]) << " "
-       << std::setw(11) << chi2 << std::endl;
   file.close();
 
   return 0;

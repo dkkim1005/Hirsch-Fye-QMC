@@ -13,29 +13,8 @@ namespace etc
 enum FOURIER_TRANSFORM { FORWARD = -1, BACKWARD = 1 };
 
 // Fast Fourier transform for 1-D.
-inline void fft_1d_complex(const std::complex<double> * input, std::complex<double> * output,
-  const int N, const FOURIER_TRANSFORM FFTW_DIRECTION)
-{
-  fftw_complex * in = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*N)),
-    * out = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*N));
-  fftw_plan p = fftw_plan_dft_1d(N, in, out, FFTW_DIRECTION, FFTW_ESTIMATE);
-
-  for(int i=0; i<N; ++i)
-  {
-    in[i][0] = input[i].real();
-    in[i][1] = input[i].imag();
-  }   
-
-  fftw_execute(p); // repeat as needed 
-
-  for(int i=0; i<N; ++i)
-    output[i] = std::complex<double>(out[i][0], out[i][1]);
-
-  fftw_destroy_plan(p);
-
-  fftw_free(in);
-  fftw_free(out);
-}
+void fft_1d_complex(const std::complex<double> * input, std::complex<double> * output,
+  const int N, const FOURIER_TRANSFORM FFTW_DIRECTION);
 
 // Ref: https://en.wikipedia.org/wiki/Simpson%27s_rule#Composite_Simpson's_rule
 template <typename FuncType>
@@ -77,11 +56,30 @@ void transpose(T * mat, const int N)
     }
 }
 
-inline std::string to_string(const double & value)
+std::string to_string(const double & value);
+
+class CubicHermiteSpline
 {
-  std::string valstr = std::to_string(value);
-  valstr.erase(valstr.find_last_not_of('0') + 1, std::string::npos);
-  valstr.erase(valstr.find_last_not_of('.') + 1, std::string::npos);
-  return valstr;
-}
+public:
+  CubicHermiteSpline(const double* xVec, const double* yVec, const double* mVec, const size_t size);
+  virtual ~CubicHermiteSpline() { this->delete_mem_(); }
+  double operator()(const double x) const;
+
+protected:
+  double * xVec_, * yVec_, * mVec_;
+  size_t size_;
+
+  explicit CubicHermiteSpline();
+  void delete_mem_();
+  void allocate_mem_(const double* xVec, const double* yVec, const double* mVec, const size_t size);
+  size_t binary_search_(const double& x) const;
+  double interp_f_(const double& t, const size_t& idx) const;
+};
+
+class MonotoneCubicInterpolation : public CubicHermiteSpline
+{
+public:
+  MonotoneCubicInterpolation(const double* xVec, const double* yVec, const size_t size);
+  virtual ~MonotoneCubicInterpolation() {}
+};
 } // end namespace etc
