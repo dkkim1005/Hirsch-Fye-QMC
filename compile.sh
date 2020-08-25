@@ -1,11 +1,11 @@
 #!/bin/bash
-TARGET=qmc
+TARGET=dmft
 LIBFFTW3='-lfftw3'
 LIBTRNG4='-ltrng4'
 LIBBLASLAPACK='-lopenblas -llapack -L/usr/local/opt/lapack/lib -L/usr/local/opt/openblas/lib'
 
 #####
-SRCS=(hirschfye_qmc green_tools etc main)
+SRCS=(hirschfye_qmc green_tools etc dmft)
 OBJ=""
 for SRC in ${SRCS[@]}; do
   if [ -e ${SRC}.o ]; then
