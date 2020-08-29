@@ -5,6 +5,8 @@
 #include <vector>
 #include <cmath>
 #include <string>
+#include <cstring>
+#include <assert.h>
 
 namespace etc
 {
