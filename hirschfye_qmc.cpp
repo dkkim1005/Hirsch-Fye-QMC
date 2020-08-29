@@ -1,22 +1,22 @@
 #include "hirschfye_qmc.hpp"
 
-HirschFyeQMC::HirschFyeQMC(const std::vector<double> & gtau0, const double beta, const double U, const unsigned long seed):
+HirschFyeQMC::HirschFyeQMC(const double * gtau0, const int ntau, const double beta, const double U, const unsigned long seed):
   nsweeps_(0),
   nchain_(0),
-  N_(gtau0.size()),
-  lambda_(std::log(std::exp(beta/(gtau0.size())*U/2.0) + std::sqrt(std::pow(std::exp(beta/(gtau0.size())*U/2.0), 2)-1))),
-  gtau0mat_(gtau0.size()*gtau0.size(), 0.0),
-  gtau_up_(gtau0.size()*gtau0.size(), 0.0),
-  gtau_dw_(gtau0.size()*gtau0.size(), 0.0),
-  Gtau_up_(gtau0.size(), 0.0),
-  Gtau_dw_(gtau0.size(), 0.0),
-  vi_up_(gtau0.size(), 0.0),
-  uj_up_(gtau0.size(), 0.0),
-  vi_dw_(gtau0.size(), 0.0),
-  uj_dw_(gtau0.size(), 0.0),
-  e_ls_(gtau0.size(), 0.0),
-  A_(gtau0.size()*gtau0.size(), 0.0),
-  spins_(gtau0.size(), 1)
+  N_(ntau),
+  lambda_(std::log(std::exp(beta/ntau*U/2.0) + std::sqrt(std::pow(std::exp(beta/ntau*U/2.0), 2)-1))),
+  gtau0mat_(ntau*ntau, 0.0),
+  gtau_up_(ntau*ntau, 0.0),
+  gtau_dw_(ntau*ntau, 0.0),
+  Gtau_up_(ntau, 0.0),
+  Gtau_dw_(ntau, 0.0),
+  vi_up_(ntau, 0.0),
+  uj_up_(ntau, 0.0),
+  vi_dw_(ntau, 0.0),
+  uj_dw_(ntau, 0.0),
+  e_ls_(ntau, 0.0),
+  A_(ntau*ntau, 0.0),
+  spins_(ntau, 1)
 {
   randdev_.seed(seed);
   // green matrix from vector
@@ -68,7 +68,7 @@ double HirschFyeQMC::do_montecarlo_step(const int nmcsteps, const int nperiodSwe
   return acceptanceRateMean;
 }
 
-void HirschFyeQMC::accumulate(std::vector<double> & G_up, std::vector<double> & G_dw, std::vector<double> & G2_up, std::vector<double> & G2_dw)
+void HirschFyeQMC::accumulate(double * G_up, double * G_dw, double * G2_up, double * G2_dw)
 {
   this->green_vector_from_matrix_(Gtau_up_, gtau_up_);
   this->green_vector_from_matrix_(Gtau_dw_, gtau_dw_);

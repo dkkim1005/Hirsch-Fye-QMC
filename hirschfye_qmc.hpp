@@ -20,10 +20,14 @@ typedef std::vector<double> ImTimeGreen;
 class HirschFyeQMC
 {
 public:
-  HirschFyeQMC(const ImTimeGreen & gtau0, const double beta, const double U, const unsigned long seed);
+  HirschFyeQMC(const double * gtau0, const int ntau, const double beta, const double U, const unsigned long seed);
   // return acceptance rate
   double do_montecarlo_step(const int nmcsteps, const int nperiodSweeps);
-  void accumulate(ImTimeGreen & G_up, ImTimeGreen & G_dw, ImTimeGreen & G2_up, ImTimeGreen & G2_dw);
+  void accumulate(double * G_up, double * G_dw, double * G2_up, double * G2_dw);
+  void get_auxiliary_fields(int * spins) const
+  {
+    std::memcpy(spins, spins_.data(), sizeof(int)*spins_.size());
+  }
 
 private:
   enum SPIN_STATE {UP = 1, DOWN = -1};
