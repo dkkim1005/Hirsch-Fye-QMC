@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 from distutils.core import setup, Extension
-module_name = 'cpp_module'
+module_name = '_cpp_module'
 
 include_dirs = ['./pybind11/include']
-libraries    = ['stdc++', 'blas', 'lapack', 'trng4']
+libraries    = ['stdc++', 'blas', 'lapack', 'trng4', 'fftw3']
 
 module = Extension(module_name,
         define_macros = [('MAJOR_VERSION', '1'), ('MINOR_VERSION', '0'),
                          ('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION')],
         include_dirs = include_dirs,
         libraries = libraries,
-        sources = ['hfqmc_pymodule.cpp'],
+        sources = ['etc.cpp', 'hirschfye_qmc.cpp', 'green_tools.cpp', 'pymodule_hfqmc.cpp'],
         language = 'c++',
         extra_compile_args = ['-std=c++11', '-O3'])
 
