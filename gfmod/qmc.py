@@ -18,6 +18,7 @@ class hfqmc:
         gtau1 = np.array([gtau0[i] for i in range(len(gtau0)-1)])
         self._impl = _cpp_module.hfqmc(gtau1, beta, U, seed)
         self._ntau = len(gtau1)
+        self._spins = np.zeros([self._ntau], dtype = 'int')
 
 
     def do_montecarlo_step(self, nmcsteps):
@@ -64,3 +65,8 @@ class hfqmc:
         err_dw[-1] = err_dw[0]
 
         return gtau_up, err_up, gtau_dw, err_dw
+
+
+    def get_auxiliary_fields(self):
+        self._impl.get_auxiliary_fields(self._spins)
+        return self._spins

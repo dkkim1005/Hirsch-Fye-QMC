@@ -2,7 +2,11 @@
 TARGET=qmc
 LIBFFTW3='-lfftw3'
 LIBTRNG4='-ltrng4'
-LIBBLASLAPACK='-lopenblas -llapack -L/usr/local/opt/lapack/lib -L/usr/local/opt/openblas/lib'
+# fill blas lapack link options in 'LIBBLASLAPACK'
+LIBBLASLAPACK=DEFAULT
+if [ $LIBBLASLAPACK = DEFAULT ]; then
+  LIBBLASLAPACK='-llapack -lblas'
+fi
 
 #####
 SRCS=(hirschfye_qmc green_tools etc main)

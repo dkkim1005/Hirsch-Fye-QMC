@@ -62,7 +62,7 @@ int main(int argc, char * argv[])
   for (int i=0; i<gtau0.size(); ++i)
     gtau0[i] = gtau[i];
 
-  HirschFyeQMC qmc(gtau0, beta, U, seed);
+  HirschFyeQMC qmc(gtau0.data(), gtau0.size(), beta, U, seed);
   std::cout << "# start Hirsch-Fye QMC" << std::endl;
   qmc.do_montecarlo_step(nwarmup, nperiodSweeps);
 
@@ -71,7 +71,7 @@ int main(int argc, char * argv[])
     std::cout << "\r# loop : " << std::setw(4) << (n+1) << " ";
     const double acceptanceRate = qmc.do_montecarlo_step(nms, nperiodSweeps);
     std::cout << " --- acceptance rate : " << acceptanceRate << std::flush;
-    qmc.accumulate(gtau0_up, gtau0_dw, gtau2_up, gtau2_dw);
+    qmc.accumulate(gtau0_up.data(), gtau0_dw.data(), gtau2_up.data(), gtau2_dw.data());
   }
   std::cout << std::endl;
 

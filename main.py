@@ -8,7 +8,7 @@ mu = 0
 V = 1
 D = 1
 nmc = 3
-nmeas = 1000
+nmeas = 100
 Uarr = [1.0, 5.0]
 seed = 0
 
