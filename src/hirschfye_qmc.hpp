@@ -3,19 +3,32 @@
 // Ref: 1) https://www.physics.rutgers.edu/grad/509/qmc.pdf
 //      2) Hirsch-Fye QMC solver, ALPS project (http://alps.comp-phys.org/mediawiki/index.php/Main_Page)
 
+//#define USE_TRNG4
+
 #include <iostream>
 #include <vector>
 #include <array>
 #include <cmath>
+#ifdef USE_TRNG4 
 #include <trng/yarn2.hpp>
-#include <trng/yarn5.hpp>
-#include <trng/yarn5s.hpp>
 #include <trng/uniform01_dist.hpp>
-#include <trng/uniform_int_dist.hpp>
+#else
+#include <random>
+#endif
 #include "blas_lapack.hpp"
 #include "etc.hpp"
 
 typedef std::vector<double> ImTimeGreen;
+
+#ifdef USE_TRNG4
+template <typename T>
+using uniform_dist = trng::uniform01_dist<T>;
+using rand_gen = trng::yarn2;
+#else
+template <typename T>
+using uniform_dist = std::uniform_real_distribution<T>;
+using rand_gen = std::mt19937;
+#endif
 
 class HirschFyeQMC
 {
@@ -44,7 +57,7 @@ private:
   const std::vector<double> gtau0_;
   std::vector<double> gtau0mat_, gtau_up_, gtau_dw_, Gtau_up_, Gtau_dw_, vi_up_, uj_up_, vi_dw_, uj_dw_, e_ls_, A_;
   std::vector<int> spins_;
-  trng::uniform01_dist<double> unidist_;
-  trng::yarn2 randdev_;
+  uniform_dist<double> unidist_;
+  rand_gen randdev_;
   std::array<double, 3> exp1lamb_, exp2lamb_;
 };
