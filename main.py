@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import numpy as np
 from gfmod import *
 
@@ -18,9 +19,7 @@ gtau = gftools.GreenInverseFourier(giwn, ntau, beta, (1, 0, 0))
 import matplotlib.pyplot as plt
 tau = np.linspace(0, beta, len(gtau))
 for i, U in enumerate(Uarr):
-    """
-    Anderson Impurity Solver 
-    """
+    print (f"\'Anderson Impurity Solver\' is now running: U = {U}.")
     solver = qmc.hfqmc(gtau, beta, U, seed)
     gtau_up, err_up, gtau_dw, err_dw = solver.meas(nmc, nmeas)
     plt.errorbar(tau, (gtau_up + gtau_dw)/2.0, (err_up + err_dw)/2, marker = 'o',
