@@ -26,8 +26,8 @@ def GreenFourier(gtau, niwn, beta):
             raise TypeError("gtau.dtype is not dtype(float64)")
     else:
         raise TypeError("type(gtau) should be 'np.ndarray' type")
-    if type(ntau) is not int:
-        raise TypeError("type(ntau) should be 'int' type")
+    if type(niwn) is not int:
+        raise TypeError("type(niwn) should be 'int' type")
     giwn = np.zeros([niwn], dtype = 'complex128')
     _cpp_module.GreenFourier(gtau, beta, giwn)
     return giwn

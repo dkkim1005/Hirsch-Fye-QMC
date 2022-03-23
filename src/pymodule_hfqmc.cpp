@@ -11,11 +11,11 @@ typedef py::array_t<std::complex<double> > PyImFreqGreen;
 class PythonHirschFyeQMC
 {
 public:
-  PythonHirschFyeQMC(const PyImTimeGreen pygtau0, const double beta, const double U, const long seed):
+  PythonHirschFyeQMC(const PyImTimeGreen pygtau0, const double beta, const double U, const long seed, const long seedDist):
     hfqmc_(nullptr)
   {
     const auto wrap_gtau0 = pygtau0.unchecked<1>();
-    hfqmc_ = new HirschFyeQMC(&wrap_gtau0(0), wrap_gtau0.shape(0), beta, U, seed);
+    hfqmc_ = new HirschFyeQMC(&wrap_gtau0(0), wrap_gtau0.shape(0), beta, U, seed, seedDist);
   }
 
   double do_montecarlo_step(const int nmcsteps, const int nperiodSweeps)
@@ -86,7 +86,7 @@ PYBIND11_MODULE(_cpp_module, m)
 {
   m.doc() = "c++ implementation of Hirsch-Fye QMC";
   py::class_<PythonHirschFyeQMC>(m, "hfqmc")
-    .def(py::init<const PyImTimeGreen, const double, const double, const long>())
+    .def(py::init<const PyImTimeGreen, const double, const double, const long, const long>())
     .def("do_montecarlo_step", &PythonHirschFyeQMC::do_montecarlo_step)
     .def("accumulate", &PythonHirschFyeQMC::accumulate)
     .def("get_auxiliary_fields", &PythonHirschFyeQMC::get_auxiliary_fields);

@@ -3,12 +3,13 @@ from . import _cpp_module
 
 
 class hfqmc:
-    def __init__(self, gtau0, beta, U, seed = 0):
+    def __init__(self, gtau0, beta, U, seed, dist = 0):
         """
           gtau0 : imaginary time Green's function (np.ndarray, float64)
            beta : inverse temperature (float64)
               U : onsite interaction (float64)
            seed : random number seed (int)
+           dist : distance between random nunber sequences (enabling for parallel sampling) (int)
         """
         if type(gtau0) is np.ndarray:
             if gtau0.dtype is not np.dtype('float64'):
@@ -16,7 +17,7 @@ class hfqmc:
         else:
             raise TypeError("type(gtau0) should be 'np.ndarray' type")
         gtau1 = np.array([gtau0[i] for i in range(len(gtau0)-1)])
-        self._impl = _cpp_module.hfqmc(gtau1, beta, U, seed)
+        self._impl = _cpp_module.hfqmc(gtau1, beta, U, seed, dist)
         self._ntau = len(gtau1)
         self._spins = np.zeros([self._ntau], dtype = 'int')
 
@@ -48,8 +49,8 @@ class hfqmc:
         _gtau2_up /= nmeas
         _gtau2_dw /= nmeas
 
-        _err_up = np.sqrt((_gtau2_up - _gtau1_up**2)/(nmeas-1))
-        _err_dw = np.sqrt((_gtau2_dw - _gtau1_dw**2)/(nmeas-1))
+        _err_up = np.sqrt((_gtau2_up - _gtau1_up**2)/(nmeas-1)/nmeas)
+        _err_dw = np.sqrt((_gtau2_dw - _gtau1_dw**2)/(nmeas-1)/nmeas)
 
         gtau_up = np.zeros([self._ntau+1])
         gtau_up[:self._ntau] = _gtau1_up

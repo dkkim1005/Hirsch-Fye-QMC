@@ -1,6 +1,6 @@
 #include "hirschfye_qmc.hpp"
 
-HirschFyeQMC::HirschFyeQMC(const double * gtau0, const int ntau, const double beta, const double U, const unsigned long seed):
+HirschFyeQMC::HirschFyeQMC(const double * gtau0, const int ntau, const double beta, const double U, const unsigned long seed, const unsigned long seedDist):
   nsweeps_(0),
   nchain_(0),
   N_(ntau),
@@ -18,7 +18,12 @@ HirschFyeQMC::HirschFyeQMC(const double * gtau0, const int ntau, const double be
   A_(ntau*ntau, 0.0),
   spins_(ntau, 1)
 {
+#ifdef USE_TRNG4
   randdev_.seed(seed);
+  randdev_.jump(2*seedDist);
+#else
+  randdev_.seed(seed+seedDist);
+#endif
   // green matrix from vector
   // change a convention of Green's function : G(tau) = -T_t<c(tau)C^+>_\beta --> +T_t<c(tau)C^+>_\beta
   for (int i=0; i<N_; i++)

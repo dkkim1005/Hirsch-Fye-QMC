@@ -33,7 +33,7 @@ using rand_gen = std::mt19937;
 class HirschFyeQMC
 {
 public:
-  HirschFyeQMC(const double * gtau0, const int ntau, const double beta, const double U, const unsigned long seed);
+  HirschFyeQMC(const double * gtau0, const int ntau, const double beta, const double U, const unsigned long seed, const unsigned long seedDist = 0);
   // return acceptance rate
   double do_montecarlo_step(const int nmcsteps, const int nperiodSweeps);
   void accumulate(double * G_up, double * G_dw, double * G2_up, double * G2_dw);
