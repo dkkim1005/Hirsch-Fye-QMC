@@ -55,8 +55,8 @@ ax.set_xlim(0, beta)
 ax.set_ylim(0, 1)
 ax.tick_params(which='both', direction='in')
 
-giwn = gftools.SemiCircularGreen(niwn, beta, mu, V, D)
-gtau = gftools.GreenInverseFourier(giwn, ntau, beta, (1, 0, 0,))
+giwn = gftools.SemiCircularGreen(niwn, beta, mu, V, D)  # non-interacting(U=0) Green's function
+gtau = gftools.GreenInverseFourier(giwn, ntau, beta, (1, 0, 0,))  # Fourier transform g(iwn) -> g(tau)
 solver = qmc.hfqmc(gtau, beta, U, seed, seedDist)
 print_log_msg(f"warm-up in MCMC ({nwarm} monte carlo steps)", comm)
 solver.do_montecarlo_step(nwarm)  # warm up
